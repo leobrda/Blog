@@ -16,7 +16,8 @@ class MenuLink (models.Model):
                                    on_delete=models.CASCADE,
                                    blank=True,
                                    null=True,
-                                   default=None)
+                                   default=None,
+                                   related_name='menu')
 
     def __str__(self):
         return self.text
@@ -38,7 +39,7 @@ class SiteSetup(models.Model):
     show_footer = models.BooleanField(default=True)
 
     favicon = models.ImageField(
-        upload_to='assets/favicon/%Y/%m',
+        upload_to='assets/favicon/%Y/%m/',
         blank=True, default='',
         validators=[validate_png],
     )
