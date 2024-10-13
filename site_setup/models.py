@@ -49,6 +49,9 @@ class SiteSetup(models.Model):
         super().save(*args, **kwargs)
 
         favicon_changed = False
+        if self.favicon:
+            favicon_changed = current_favicon_name != self.favicon.name
+
         if favicon_changed:
             resize_image(self.favicon, 32)
 
