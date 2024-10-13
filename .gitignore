@@ -1,12 +1,14 @@
+static/
+media/
+assets/
+django-summernote/
+
 # Django #
 *.log
 *.pot
 *.pyc
 __pycache__
 db.sqlite3
-media/
-assets/
-django-summernote/
 
 # Backup files #
 *.bak
