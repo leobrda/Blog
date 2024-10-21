@@ -92,22 +92,36 @@ class TagListView(PostListView):
         return ctx
 
 
-def search(request):
-    search_value = request.GET.get('search', '').strip()
-    posts = Post.objects.get_published().filter(Q(title__icontais=search_value) | Q(excerpt__icontains=search_value) | Q(content__icontais=search_value))[:PER_PAGE]
+class SearchListView(PostListView):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._search_value = ''
 
-    page_title = f'{search_value[:30]} - Search - '
+    def setup(self, request, *args, **kwargs):
+        self._search_value = request.GET.get('search', '').strip()
+        return super().setup(request, *args, **kwargs)
 
-    return render(
-        request,
-        'blog/pages/index.html',
+    def get_queryset(self):
+        search_value = self._search_value
+        return super().get_queryset().filter(Q(title__icontais=search_value) |
+                                             Q(excerpt__icontains=search_value) |
+                                             Q(content__icontais=search_value))[:PER_PAGE]
 
-        {
-            'page_obj': posts,
-            'search_value': search_value,
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        search_value = self._search_value
+        page_title = f'{search_value[:30]} - Search - '
+        ctx.update({
             'page_title': page_title,
-        }
-    )
+            'search_value': search_value,
+        })
+
+        return ctx
+
+    def get(self, request, *args, **kwargs):
+        if self._search_value == '':
+            return redirect('blog:index')
+        return super().get(request, *args, **kwargs)
 
 
 def page(request, slug):
