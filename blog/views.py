@@ -5,7 +5,7 @@ from blog.models import Post, Page
 from django.db.models import Q
 from django.contrib.auth.models import User
 from django.http import Http404
-from django.views.generic import ListView
+from django.views.generic import ListView, DetailView
 from django.db.models.query import QuerySet
 
 PER_PAGE = 9
@@ -124,22 +124,25 @@ class SearchListView(PostListView):
         return super().get(request, *args, **kwargs)
 
 
-def page(request, slug):
-    page_obj = Page.objects.filter(is_published=True).filter(slug=slug).first()
+class PageDetailView(DetailView):
+    model = Page
+    template_name = 'blog/pages/page.html'
+    slug_field = 'slug'
+    context_object_name = 'page'
 
-    if page_obj is None:
-        raise Http404()
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        page = self.object()
+        page_title = f'{page.title} - Página - '
 
-    page_title = f'{page_obj.title} - Página - '
-
-    return render(
-        request,
-        'blog/pages/page.html',
-        {
-            'page': page_obj,
+        ctx.update({
             'page_title': page_title,
-        }
-    )
+        })
+
+        return ctx
+
+    def get_queryset(self):
+        return super().get_queryset().filter(is_published=True)
 
 
 def post(request, slug):
