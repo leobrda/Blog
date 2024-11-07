@@ -1,4 +1,4 @@
-from blog.views import PostListView, PostDetailView, PageDetailView, CreatedByListView, CategoryListView, TagListView, SearchListView
+from blog.views import (PostListView, PostDetailView, PageDetailView, CreatedByListView, CategoryListView, TagListView, SearchListView)
 from django.urls import path
 
 app_name = 'blog'

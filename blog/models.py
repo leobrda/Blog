@@ -13,18 +13,17 @@ class PostAttachment(AbstractAttachment):
 
         current_file_name = str(self.file.name)
         super_save = super().save(*args, **kwargs)
-        cover_changed = False
+        file_changed = False
 
         if self.file:
-            cover_changed = current_file_name != self.file.name
+            file_changed = current_file_name != self.file.name
 
-        if cover_changed:
+        if file_changed:
             resize_image(self.file, 900, True, 70)
 
         return super_save
 
 
-# Create your models here.
 class Tag(models.Model):
     class Meta:
         verbose_name = 'Tag'
@@ -49,6 +48,7 @@ class Category(models.Model):
     class Meta:
         verbose_name = 'Category'
         verbose_name_plural = 'Categories'
+
     name = models.CharField(max_length=255)
     slug = models.SlugField(
         unique=True, default=None,
@@ -65,19 +65,23 @@ class Category(models.Model):
 
 
 class Page(models.Model):
-    class Meta:
-        verbose_name = 'Page'
-        verbose_name_plural = 'Pages'
-
     title = models.CharField(max_length=65,)
-    slug = models.SlugField(unique=True, default='', null=False, blank=True, max_length=255)
-    is_published = models.BooleanField(default=False, help_text='Este campo precisará estar marcado para a página ser exibida publicamente')
+    slug = models.SlugField(
+        unique=True, default="",
+        null=False, blank=True, max_length=255
+    )
+    is_published = models.BooleanField(
+        default=False,
+        help_text=(
+            'Este campo precisará estar marcado '
+            'para a página ser exibida publicamente.'
+        ),
+    )
     content = models.TextField()
 
     def get_absolute_url(self):
         if not self.is_published:
             return reverse('blog:index')
-
         return reverse('blog:page', args=(self.slug,))
 
     def save(self, *args, **kwargs):
@@ -102,7 +106,10 @@ class Post(models.Model):
     objects = PostManager()
 
     title = models.CharField(max_length=65, )
-    slug = models.SlugField(unique=True, default='', null=False, blank=True, max_length=255)
+    slug = models.SlugField(
+        unique=True, default="",
+        null=False, blank=True, max_length=255
+    )
     excerpt = models.CharField(max_length=150)
     is_published = models.BooleanField(default=False, help_text='Este campo precisará estar marcado para o post ser exibido publicamente')
     content = models.TextField()
@@ -111,19 +118,21 @@ class Post(models.Model):
         default=True,
         help_text='Se marcado, exibirá a capa dentro do post.'
     )
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True,)
     # user.post_created_by.all
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True, related_name='post_created_by')
-    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True, related_name='post_created_by',)
+    updated_at = models.DateTimeField(auto_now=True,)
     # user.post_updated_by.all
     updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True, related_name='post_updated_by',)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, default=None,)
-    tags = models.ManyToManyField(Tag, blank=True, default='')
+    tags = models.ManyToManyField(Tag, blank=True, default='',)
+
+    def __str__(self):
+        return self.title
 
     def get_absolute_url(self):
         if not self.is_published:
             return reverse('blog:index')
-
         return reverse('blog:post', args=(self.slug,))
 
     def save(self, *args, **kwargs):
@@ -141,7 +150,3 @@ class Post(models.Model):
             resize_image(self.cover, 900, True, 70)
 
         return super_save
-
-    def __str__(self):
-        return self.title
-
